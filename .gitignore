@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+.venv/
+venv/
+dist/
+build/
+
+# Backend secrets & data
+backend/.env
+backend/firebase-service-account*.json
+backend/data/
+
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/app/google-services.json
+android/local.properties
+*.apk
+*.aab
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude
+.claude/settings.local.json
+
