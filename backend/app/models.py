@@ -3,6 +3,8 @@ from datetime import datetime
 from sqlalchemy import Boolean, DateTime, ForeignKey, Index, Integer, String, Text, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
+TZDateTime = DateTime(timezone=True)
+
 
 class Base(DeclarativeBase):
     pass
@@ -16,9 +18,9 @@ class User(Base):
     email: Mapped[str | None] = mapped_column(String)
     access_token: Mapped[str | None] = mapped_column(Text)
     refresh_token: Mapped[str | None] = mapped_column(Text)
-    token_expires_at: Mapped[datetime | None] = mapped_column(DateTime)
+    token_expires_at: Mapped[datetime | None] = mapped_column(TZDateTime)
     fcm_token: Mapped[str | None] = mapped_column(Text)
-    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(TZDateTime, server_default=func.now())
 
     channels: Mapped[list["Channel"]] = relationship(
         secondary="user_channels", back_populates="users"
@@ -35,9 +37,9 @@ class Channel(Base):
     title: Mapped[str] = mapped_column(String, nullable=False)
     thumbnail_url: Mapped[str | None] = mapped_column(Text)
     websub_active: Mapped[bool] = mapped_column(Boolean, default=False)
-    websub_expires_at: Mapped[datetime | None] = mapped_column(DateTime)
-    last_checked_at: Mapped[datetime | None] = mapped_column(DateTime)
-    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    websub_expires_at: Mapped[datetime | None] = mapped_column(TZDateTime)
+    last_checked_at: Mapped[datetime | None] = mapped_column(TZDateTime)
+    created_at: Mapped[datetime] = mapped_column(TZDateTime, server_default=func.now())
 
     users: Mapped[list["User"]] = relationship(
         secondary="user_channels", back_populates="channels"
@@ -70,9 +72,9 @@ class Video(Base):
     )
     title: Mapped[str] = mapped_column(String, nullable=False)
     thumbnail_url: Mapped[str | None] = mapped_column(Text)
-    published_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    published_at: Mapped[datetime] = mapped_column(TZDateTime, nullable=False)
     duration: Mapped[str | None] = mapped_column(String)
-    fetched_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    fetched_at: Mapped[datetime] = mapped_column(TZDateTime, server_default=func.now())
 
     channel: Mapped["Channel"] = relationship(back_populates="videos")
     user_states: Mapped[list["UserVideoState"]] = relationship(back_populates="video")
@@ -89,7 +91,7 @@ class UserVideoState(Base):
         Integer, ForeignKey("videos.id", ondelete="CASCADE"), primary_key=True
     )
     status: Mapped[str] = mapped_column(String, nullable=False, default="new")
-    dismissed_at: Mapped[datetime | None] = mapped_column(DateTime)
+    dismissed_at: Mapped[datetime | None] = mapped_column(TZDateTime)
 
     user: Mapped["User"] = relationship(back_populates="video_states")
     video: Mapped["Video"] = relationship(back_populates="user_states")
@@ -105,7 +107,7 @@ class UserPreference(Base):
     polling_interval_min: Mapped[int] = mapped_column(Integer, default=15)
     notification_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, server_default=func.now(), onupdate=func.now()
+        TZDateTime, server_default=func.now(), onupdate=func.now()
     )
 
     user: Mapped["User"] = relationship(back_populates="preferences")
