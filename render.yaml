@@ -14,6 +14,8 @@ services:
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.9
       - key: YSM_DATABASE_URL
         fromDatabase:
           name: youtube-sub-manager-db
