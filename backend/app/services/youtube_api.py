@@ -27,6 +27,15 @@ class ReauthenticationRequiredError(RuntimeError):
     """Raised when stored Google credentials cannot be refreshed."""
 
 
+def _normalize_google_expiry(expiry: datetime | None) -> datetime | None:
+    """Google credentials expect a naive UTC expiry for comparisons."""
+    if expiry is None:
+        return None
+    if expiry.tzinfo is None:
+        return expiry
+    return expiry.astimezone(timezone.utc).replace(tzinfo=None)
+
+
 def _get_credentials(user: User) -> Credentials:
     """Build Google credentials from stored user tokens."""
     creds = Credentials(
@@ -35,7 +44,7 @@ def _get_credentials(user: User) -> Credentials:
         token_uri="https://oauth2.googleapis.com/token",
         client_id=settings.google_client_id,
         client_secret=settings.google_client_secret,
-        expiry=user.token_expires_at,
+        expiry=_normalize_google_expiry(user.token_expires_at),
     )
     if creds.expired and creds.refresh_token:
         creds.refresh(GoogleRequest())
