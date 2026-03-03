@@ -22,10 +22,10 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "BASE_URL", "\"http://10.149.192.70:8000\"")
+            buildConfigField("String", "BASE_URL", "\"https://yt-sub-manager.onrender.com\"")
         }
         release {
-            buildConfigField("String", "BASE_URL", "\"https://YOUR_PRODUCTION_URL\"")
+            buildConfigField("String", "BASE_URL", "\"https://yt-sub-manager.onrender.com\"")
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
