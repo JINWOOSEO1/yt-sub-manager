@@ -1,5 +1,5 @@
 import logging
-import sys
+import os
 from pathlib import Path
 
 from pydantic_settings import BaseSettings
@@ -7,6 +7,18 @@ from pydantic_settings import BaseSettings
 logger = logging.getLogger(__name__)
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_SQLITE_DB_PATH = BACKEND_DIR / "data" / "youtube_sub_manager.db"
+DEFAULT_WEBSUB_CALLBACK_PATH = "/api/v1/websub/callback"
+
+
+def _normalize_database_url(database_url: str) -> str:
+    """Convert generic Postgres URLs to SQLAlchemy asyncpg URLs."""
+    if database_url.startswith("postgresql+asyncpg://"):
+        return database_url
+    if database_url.startswith("postgresql://"):
+        return database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    if database_url.startswith("postgres://"):
+        return database_url.replace("postgres://", "postgresql+asyncpg://", 1)
+    return database_url
 
 
 class Settings(BaseSettings):
@@ -40,6 +52,14 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+settings.database_url = _normalize_database_url(settings.database_url)
+if (
+    settings.websub_callback_url == f"http://localhost:8000{DEFAULT_WEBSUB_CALLBACK_PATH}"
+    and os.getenv("RENDER_EXTERNAL_HOSTNAME")
+):
+    settings.websub_callback_url = (
+        f"https://{os.environ['RENDER_EXTERNAL_HOSTNAME']}{DEFAULT_WEBSUB_CALLBACK_PATH}"
+    )
 
 # Validate critical settings at startup
 if not settings.google_client_id or not settings.google_client_secret:

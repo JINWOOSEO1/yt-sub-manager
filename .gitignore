@@ -34,3 +34,5 @@ Thumbs.db
 # Claude
 .claude/settings.local.json
 
+# Local planning docs
+RENDER_DEPLOY_PLAN.local.md
