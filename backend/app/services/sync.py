@@ -26,8 +26,10 @@ async def sync_subscriptions(db: AsyncSession, user: User) -> int:
     """Fetch user's YouTube subscriptions and sync to DB. Returns channel count."""
     from app.services.youtube_api import fetch_subscriptions
 
+    logger.info("Starting subscription sync for user %d", user.id)
     subs = await fetch_subscriptions(user)
     if not subs:
+        logger.info("User %d has no subscriptions returned by YouTube API", user.id)
         await backfill_videos(db, user)
         return 0
 
@@ -78,6 +80,7 @@ async def sync_subscriptions(db: AsyncSession, user: User) -> int:
     # Backfill recent videos for all channels
     await backfill_videos(db, user)
 
+    logger.info("Subscription sync finished for user %d with %d channels", user.id, len(subs))
     return len(subs)
 
 
@@ -90,6 +93,7 @@ async def backfill_videos(db: AsyncSession, user: User):
         .where(UserChannel.user_id == user.id)
     )
     channels = result.scalars().all()
+    logger.info("Backfilling videos for user %d across %d channels", user.id, len(channels))
 
     async with httpx.AsyncClient(timeout=30) as client:
         for channel in channels:
@@ -116,6 +120,7 @@ async def backfill_videos(db: AsyncSession, user: User):
     await hydrate_video_metadata(db, user, result.scalars().all())
 
     await db.commit()
+    logger.info("Finished backfilling recent videos for user %d", user.id)
 
 
 async def _fetch_rss_videos(

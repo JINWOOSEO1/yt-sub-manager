@@ -49,6 +49,7 @@ async def start_sync_job(user_id: int) -> SyncJobStatus:
             )
 
         started_at = datetime.now(timezone.utc)
+        logger.info("Queueing sync job for user %d", user_id)
         status = SyncJobStatus(
             state="queued",
             message="Sync queued.",
@@ -65,6 +66,7 @@ async def start_sync_job(user_id: int) -> SyncJobStatus:
 async def _run_sync_job(user_id: int, started_at: datetime):
     from app.services.sync import sync_subscriptions
 
+    logger.info("Sync job started for user %d", user_id)
     _sync_statuses[user_id] = SyncJobStatus(
         state="running",
         message="Sync in progress.",
@@ -89,6 +91,7 @@ async def _run_sync_job(user_id: int, started_at: datetime):
             error=str(exc),
         )
     else:
+        logger.info("Sync job succeeded for user %d with %d channels", user_id, channel_count)
         _sync_statuses[user_id] = SyncJobStatus(
             state="succeeded",
             message=f"Synced {channel_count} channels.",

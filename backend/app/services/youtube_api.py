@@ -74,7 +74,7 @@ async def fetch_subscriptions(user: User) -> list[dict]:
         service = _build_service(user)
     except Exception:
         logger.exception("Failed to build YouTube API service for user %d", user.id)
-        return []
+        raise
 
     channels = []
     page_token = None
@@ -110,6 +110,13 @@ async def fetch_subscriptions(user: User) -> list[dict]:
             user.id,
             len(channels),
         )
+        raise
+
+    logger.info(
+        "Fetched %d subscriptions for user %d",
+        len(channels),
+        user.id,
+    )
 
     return channels
 
